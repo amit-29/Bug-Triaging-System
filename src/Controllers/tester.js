@@ -5,9 +5,11 @@ exports.postTester=async (req,res) =>{
     const tester=new Tester({
         name:req.body.name,
         email:req.body.email,
-        password:req.body.password
+        password:req.body.password,
+       // position: req.body.position
+
     })
-        
+    
         
         try{
             await tester.save()
@@ -22,6 +24,9 @@ exports.postTester=async (req,res) =>{
 }
 
 exports.getTester=async (req,res)=>{
-    res.render('signup')
+    res.render('tester',{
+        name:req.body.name
+        
+    })
 
 }
