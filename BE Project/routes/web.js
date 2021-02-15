@@ -23,6 +23,10 @@ router.post('/tester-signup', auth.postTesterSignup);
 router.post('/tester-logout', auth.postTesterLogout);
 router.get('/tester-userProfile', auth.getTesterUserProfile);
 router.post('/tester-userProfile', auth.postTesterUserProfile);
+router.get('/tester-reset', auth.getTesterReset);
+router.get('/tester-newPassword/:token', auth.getTesterNewPassword);
+router.post('/tester-newPassword',auth.postTesterNewPassword);
+router.post('/tester-reset', auth.postTesterReset);
 // router.get('/flot', (req, res) => {
 // 	res.render('flot.hbs', {
 // 		flot: true

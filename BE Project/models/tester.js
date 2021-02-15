@@ -18,6 +18,7 @@ const testerSchema = new Schema({
   },
   resetToken: String,
   resetTokenExpiration: Date,
+  
 
 });
 

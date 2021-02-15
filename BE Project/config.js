@@ -1,11 +1,10 @@
-'use strict'
 
 module.exports = {
   mailer: {
-    service: 'Gmail',
+    service: 'gmail',
     auth: {
-      user: 'xyz@gmail.com',
-      pass: 'xyz'
+      user: 'email',
+      pass: 'password'
     }
   }
 }

@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 // }));
 
 // const transporter = nodemailer.createTransport(config.mailer);
+const transporter = nodemailer.createTransport(config.mailer);
 
 exports.getLogin =  (req, res) => {
 	res.render('login.ejs', {
@@ -228,6 +229,105 @@ exports.postTesterSignup =  (req, res) => {
             console.log(err);
         });
 };
+
+exports.getTesterReset = (req,res) => {
+   
+    res.render('tester-reset.ejs', {
+		morris: true,
+		float: false,
+        tables: false,
+        csrfToken: req.csrfToken()
+	});
+}
+
+exports.postTesterReset =  (req, res) => {
+    crypto.randomBytes(32,(err,buffer) => {
+        if(err){
+            return res.redirect('/tester-reset');
+        }
+        const token = buffer.toString('hex');
+        Tester.findOne({email: req.body.email})
+        .then(user => {
+            if(!user) {
+                return res.redirect('/tester-reset');
+            }
+            user.resetToken = token;
+            user.resetTokenExpiration = Date.now() + 36000000;
+            return user.save();
+        })
+        .then(result => {
+            var mailOptions = {
+                    from: 'email',
+                    to: req.body.email,
+                    subject: 'Password Reset!',
+                    html: `
+                    <h1>You requested for password reset!</h1>
+                    <p> Click this to reset the password</p>
+                    <a href="http://localhost:3000/tester-newPassword/${token}">link</a>
+                    `
+                  };
+            return transporter.sendMail(mailOptions);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    })
+}
+
+
+exports.getTesterNewPassword = (req, res) => {
+    const token = req.params.token;
+    Tester.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+        .then(user => {
+        
+            res.render('tester-newPassword.ejs', {
+                morris: true,
+                float: false,
+                tables: false,
+                csrfToken: req.csrfToken(),
+                userId: user._id.toString(),
+                token: token,
+                passwordToken: token
+            });
+        })
+        .catch(err => {
+        console.log(err);
+        });
+}
+
+exports.postTesterNewPassword = (req, res, next) => {
+    const newPassword = req.body.password;
+    const userId = req.body.userId;
+    const passwordToken = req.body.token;
+    let resetUser;
+    
+  
+    Tester.findOne({
+      resetToken: passwordToken,
+      resetTokenExpiration: { $gt: Date.now() },
+      _id: userId
+    })
+      .then(user => {
+        console.log(userId);
+        resetUser = user;
+        return bcrypt.hash(newPassword, 12);
+      })
+      .then(hashedPassword => {
+        resetUser.password = hashedPassword;
+        resetUser.resetToken = undefined;
+        resetUser.resetTokenExpiration = undefined;
+        return resetUser.save();
+      })
+      .then(result => {
+        res.redirect('/');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+
+
 
 exports.postTesterLogout =  (req, res) => {
     req.session.destroy(result => {
