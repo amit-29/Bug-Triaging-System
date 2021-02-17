@@ -8,6 +8,7 @@ const mongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 
 const Tester = require('./models/tester');
+const Developer = require('./models/developer');
 
 const MONGODB_URI = 'mongodb+srv://amitsumit:amitsumit12345@cluster0.ypyfy.mongodb.net/test';
 const app = express();
@@ -34,15 +35,22 @@ app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
   }
-  
-
+  if(req.session.developer){
+    Developer.findById(req.session.user._id)
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+  }
+else{
     Tester.findById(req.session.user._id)
     .then(user => {
       req.user = user;
       next();
     })
     .catch(err => console.log(err));
-  
+}
   
 });
 
@@ -56,6 +64,7 @@ mongoose
   )
   .then(result => {
     app.listen(3000);
+    console.log('server started')
   })
   .catch(err => {
     console.log(err);

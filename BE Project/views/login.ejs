@@ -6,6 +6,22 @@
 
 <body>
    
+<main>
+    <h1>Developer Login</h1>
+        <form class="login-form" action="/developer-login" method="POST">
+            <input type="hidden" value="<%=csrfToken %>" name="_csrf">
+            <div class="form-control">
+                <label for="email">E-Mail</label>
+                <input type="email" name="email" id="email">
+            </div>
+            <div class="form-control">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            <button class="btn" type="submit">Login</button>
+            <a href="/developer-signup" style="padding-left: 2rem;">Signup </a>
+            <a href="/developer-reset" style="padding-left: 4rem;">Reset Password </a>
+        </form>
 
 
         <h1>Tester Login</h1>
@@ -21,6 +37,8 @@
             </div>
             <button class="btn" type="submit">Login</button>
             <a href="/tester-signup" style="padding-left: 2rem;">Signup </a>
+            <a href="/tester-reset" style="padding-left: 4rem;">Reset Password </a>
+
         </form>
     </main>
 </body>
