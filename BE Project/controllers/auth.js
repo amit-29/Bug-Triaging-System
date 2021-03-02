@@ -1,5 +1,7 @@
 const Tester = require('../models/tester');
 const Developer = require('../models/developer');
+const Manager = require('../models/manager');
+
 
 
 const bcrypt = require("bcryptjs");
@@ -18,25 +20,24 @@ exports.getLogin =  (req, res) => {
 	});
 };
 
-exports.getDeveloperUserProfile = (req, res) => {
+exports.getManagerUserProfile = (req, res) => {
     
-    res.render('developer-userProfile.ejs', {
+    res.render('manager-userProfile.ejs', {
         morris: true,
         float: false,
         tables: false,
-        user: req.user,
+        user: req.session.user,
         csrfToken: req.csrfToken()
     });
 }
-
-exports.postDeveloperUserProfile = (req, res) => {
+exports.postManagerUserProfile = (req, res) => {
 
     req.user.name=req.body.name;
     req.user.email=req.body.email;
     
     req.user.save()
      .then(result => {
-        res.render('developer-index.ejs', {
+        res.render('manager-index.ejs', {
             morris: true,
             float: false,
             tables: false,
@@ -45,9 +46,248 @@ exports.postDeveloperUserProfile = (req, res) => {
      })
     .catch(err => console.log(err));
 }
+exports.postManagerLogin =  (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    Manager.findOne({email : email})
+        .then(user => {
+           if(!user){
+               return res.redirect('/')
+           }
+           bcrypt.compare(password,user.password)
+                .then(result => {
+                    if(result){
+                        req.session.isLoggedIn = true;
+                        req.session.user = user;
+                        req.session.manager=true;
+                        return req.session.save(result => {
+                            res.render('manager-index.ejs', {
+                                morris: true,
+                                float: false,
+                                tables: false,
+                                csrfToken: req.csrfToken()
+                            });
+                        });
+                    }
+                    res.redirect('/');
+                })
+        })
+        .catch(err => {
+            res.redirect('/');
+        });
+};
+exports.getManagerSignup =  (req, res) => {
+	res.render('manager-signup.ejs', {
+		morris: true,
+		float: false,
+        tables: false,
+        csrfToken: req.csrfToken()
+	});
+};
+exports.postManagerSignup =  (req, res) => {
+
+    const name = req.body.name;
+    const email = req.body.email;
+    
+    const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+    Manager.findOne({ email: email })
+        .then(err => {
+        if (err) {
+            return res.redirect('/manager-signup');
+        }
+        return bcrypt.hash(password,12)
+            .then(hashedPassword => {
+                const user = new Manager({
+                    email: email,
+                    password: hashedPassword,
+                    name: name,
+                
+                });
+                return user.save();
+               })
+            .then(result => {
+                res.redirect('/');
+
+                  })
+            .catch(err => {
+                console.log(err);
+            });
+          
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
+exports.getManagerReset = (req,res) => {
+   
+    res.render('manager-reset.ejs', {
+		morris: true,
+		float: false,
+        tables: false,
+        csrfToken: req.csrfToken()
+	});
+}
+
+exports.postManagerReset =  (req, res) => {
+    crypto.randomBytes(32,(err,buffer) => {
+        if(err){
+            return res.redirect('/manager-reset');
+        }
+        const token = buffer.toString('hex');
+        Manager.findOne({email: req.body.email})
+        .then(user => {
+            if(!user) {
+                return res.redirect('/manager-reset');
+            }
+            user.resetToken = token;
+            user.resetTokenExpiration = Date.now() + 36000000;
+            return user.save();
+        })
+        .then(result => {
+            var mailOptions = {
+                    from: 'bhattamitkumar11@gmail.com',
+                    to: req.body.email,
+                    subject: 'Password Reset!',
+                    html: `
+                    <h1>You requested for password reset!</h1>
+                    <p> Click this to reset the password</p>
+                    <a href="http://localhost:3000/manager-newPassword/${token}">link</a>
+                    `
+                  };
+            return transporter.sendMail(mailOptions);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    })
+}
+exports.getManagerNewPassword = (req, res) => {
+    const token = req.params.token;
+    Manager.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+        .then(user => {
+        
+            res.render('manager-newPassword.ejs', {
+                morris: true,
+                float: false,
+                tables: false,
+                csrfToken: req.csrfToken(),
+                userId: user._id.toString(),
+                token: token,
+                passwordToken: token
+            });
+        })
+        .catch(err => {
+        console.log(err);
+        });
+}
+
+exports.postManagerNewPassword = (req, res, next) => {
+    const newPassword = req.body.password;
+    const userId = req.body.userId;
+    const passwordToken = req.body.token;
+    let resetUser;
+    
+  
+    Manager.findOne({
+      resetToken: passwordToken,
+      resetTokenExpiration: { $gt: Date.now() },
+      _id: userId
+    })
+      .then(user => {
+        console.log(userId);
+        resetUser = user;
+        return bcrypt.hash(newPassword, 12);
+      })
+      .then(hashedPassword => {
+        resetUser.password = hashedPassword;
+        resetUser.resetToken = undefined;
+        resetUser.resetTokenExpiration = undefined;
+        return resetUser.save();
+      })
+      .then(result => {
+        res.redirect('/');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+
+
+  exports.postManagerLogout =  (req, res) => {
+    req.session.destroy(result => {
+        res.redirect('/');
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                              DEVELOPER-AUTH
+exports.getDeveloperUserProfile = (req, res) => {
+    console.log('Here')
+    // console.log('Im in!!')
+    res.render('developer-userProfile.ejs', {
+        morris: true,
+        float: false,
+        tables: false,
+        user: req.session.user,
+        csrfToken: req.csrfToken()
+    });
+}
+
+exports.postDeveloperUserProfile = (req, res) => {
+    console.log(req.session.user)
+
+    req.session.user.name=req.body.name;
+    req.session.user.email=req.body.email;
+    
+    req.user.save()
+     .then(result => {
+        res.render('developer-index.ejs', {
+            morris: true,
+            float: false,
+            tables: false,
+            
+
+            csrfToken: req.csrfToken()
+        });
+     })
+    .catch(err => console.log(err));
+}
 exports.postDeveloperLogin =  (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
+    
+
     Developer.findOne({email : email})
         .then(user => {
            if(!user){
@@ -56,6 +296,8 @@ exports.postDeveloperLogin =  (req, res) => {
            bcrypt.compare(password,user.password)
                 .then(result => {
                     if(result){
+                        // console.log('Im in!!')
+
                         req.session.isLoggedIn = true;
                         req.session.user = user;
                         req.session.developer=true;
@@ -241,15 +483,15 @@ exports.getTesterUserProfile = (req, res) => {
         morris: true,
         float: false,
         tables: false,
-        user: req.user,
+        user: req.session.user,
         csrfToken: req.csrfToken()
     });
 }
 
 exports.postTesterUserProfile = (req, res) => {
 
-    req.user.name=req.body.name;
-    req.user.email=req.body.email;
+    req.session.user.name=req.body.name;
+    req.session.user.email=req.body.email;
     
     req.user.save()
      .then(result => {
@@ -302,6 +544,7 @@ exports.getTesterSignup =  (req, res) => {
 };
 
 exports.postTesterSignup =  (req, res) => {
+
     const name = req.body.name;
     const email = req.body.email;
     

@@ -5,8 +5,27 @@
 </head>
 
 <body>
+    <main>
+        <h1>Manager Login</h1>
+            <form class="login-form" action="/manager-login" method="POST">
+                <input type="hidden" value="<%=csrfToken %>" name="_csrf">
+                <div class="form-control">
+                    <label for="email">E-Mail</label>
+                    <input type="email" name="email" id="email">
+                </div>
+                <div class="form-control">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password">
+                </div>
+                <button class="btn" type="submit">Login</button>
+                <a href="/manager-signup" style="padding-left: 2rem;">Signup </a>
+                <a href="/manager-reset" style="padding-left: 4rem;">Reset Password </a>
+            </form>
+    
+    
    
 <main>
+    
     <h1>Developer Login</h1>
         <form class="login-form" action="/developer-login" method="POST">
             <input type="hidden" value="<%=csrfToken %>" name="_csrf">
@@ -25,7 +44,7 @@
 
 
         <h1>Tester Login</h1>
-        <form class="login-form" action="/tester-login" method="POST">
+        <form class="login-form" action="/tester-login" method="POST" >
             <input type="hidden" value="<%=csrfToken %>" name="_csrf">
             <div class="form-control">
                 <label for="email">E-Mail</label>
@@ -36,8 +55,8 @@
                 <input type="password" name="password" id="password">
             </div>
             <button class="btn" type="submit">Login</button>
-            <a href="/tester-signup" style="padding-left: 2rem;">Signup </a>
-            <a href="/tester-reset" style="padding-left: 4rem;">Reset Password </a>
+            <a href="/tester-signup" style="padding-left: 2rem;"  >Signup </a>
+            <a href="/tester-reset" style="padding-left: 4rem;"  >Reset Password </a>
 
         </form>
     </main>

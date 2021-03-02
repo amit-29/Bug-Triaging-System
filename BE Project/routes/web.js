@@ -13,6 +13,26 @@ router.get('/', auth.getLogin);
 
 
 
+
+
+router.post('/manager-login', auth.postManagerLogin);
+router.get('/manager-signup', auth.getManagerSignup);
+router.post('/manager-signup', auth.postManagerSignup)
+//console.log(req));
+router.post('/manager-logout', auth.postManagerLogout);
+router.get('/manager-userProfile', auth.getManagerUserProfile);
+router.post('/manager-userProfile',auth.postManagerUserProfile);
+router.get('/manager-reset', auth.getManagerReset);
+router.get('/manager-newPassword/:token', auth.getManagerNewPassword);
+router.post('/manager-newPassword',auth.postManagerNewPassword);
+router.post('/manager-reset', auth.postManagerReset);
+
+
+
+
+
+
+                             //DEVELOPER-ROUTES
 router.post('/developer-login', auth.postDeveloperLogin);
 router.get('/developer-signup', auth.getDeveloperSignup);
 router.post('/developer-signup', auth.postDeveloperSignup)

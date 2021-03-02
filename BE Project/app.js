@@ -9,6 +9,8 @@ const csrf = require("csurf");
 
 const Tester = require('./models/tester');
 const Developer = require('./models/developer');
+const Manager = require('./models/manager');
+
 
 const MONGODB_URI = 'mongodb+srv://amitsumit:amitsumit12345@cluster0.ypyfy.mongodb.net/test';
 const app = express();
@@ -35,7 +37,15 @@ app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
   }
-  if(req.session.developer){
+  if(req.session.manager==true){
+    Manager.findById(req.session.user._id)
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+  }
+  else if(req.session.developer==true){
     Developer.findById(req.session.user._id)
     .then(user => {
       req.user = user;
