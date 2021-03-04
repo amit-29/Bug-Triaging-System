@@ -259,16 +259,16 @@ exports.getDeveloperUserProfile = (req, res) => {
         morris: true,
         float: false,
         tables: false,
-        user: req.session.user,
+        user: req.user,
         csrfToken: req.csrfToken()
     });
 }
 
 exports.postDeveloperUserProfile = (req, res) => {
-    console.log(req.session.user)
+    console.log(req.user)
 
-    req.session.user.name=req.body.name;
-    req.session.user.email=req.body.email;
+    req.user.name=req.body.name;
+    req.user.email=req.body.email;
     
     req.user.save()
      .then(result => {
@@ -483,15 +483,15 @@ exports.getTesterUserProfile = (req, res) => {
         morris: true,
         float: false,
         tables: false,
-        user: req.session.user,
+        user: req.user,
         csrfToken: req.csrfToken()
     });
 }
 
 exports.postTesterUserProfile = (req, res) => {
 
-    req.session.user.name=req.body.name;
-    req.session.user.email=req.body.email;
+    req.user.name=req.body.name;
+    req.user.email=req.body.email;
     
     req.user.save()
      .then(result => {

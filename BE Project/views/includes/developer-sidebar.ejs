@@ -3,11 +3,12 @@
                     <a href="/developer-userProfile" ><i class="fa fa-user fa-fw"></i> User Profile</a>
 
                 </li>
-                <form action="/" method="get">
-
-                    <input type="submit" value="Logout"  
-                         name="Submit" id="frm1_submit" />
+                <form class="login-form" action="/developer-logout" method="POST">
+                    <input type="hidden" value="<%=csrfToken %>" name="_csrf">
+                    <button  type="submit"  class="btn-primary"><i class="fa fa-sign-out fa-fw"></i>Logout</button>
                 </form>
+            
+            
 
             </ul>
         </div>
